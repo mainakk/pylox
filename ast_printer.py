@@ -1,6 +1,7 @@
 from io import StringIO
-from Expr import Binary, Expr, Grouping, Literal, Unary, Visitor
-from lox import Token, TokenType
+from expr import Binary, Expr, Grouping, Literal, Unary, Visitor
+from token_type import TokenType
+from token_ import Token
 
 
 class AstPrinter(Visitor):

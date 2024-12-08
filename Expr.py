@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
-from lox import Token
+from token_ import Token
 
 
 class Expr(ABC):

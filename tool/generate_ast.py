@@ -12,12 +12,12 @@ class AstGenerator:
 
     @staticmethod
     def define_ast(output_dir: str, base_name: str, types: list[str]):
-        path = output_dir + "/" + base_name + ".py"
+        path = output_dir + "/" + base_name.lower() + ".py"
         with open(path, "w") as f:
             f.write("from abc import ABC, abstractmethod\n")
             f.write("from dataclasses import dataclass\n")
             f.write("from typing import Any\n")
-            f.write("from lox import Token\n\n\n")
+            f.write("from token_ import Token\n\n\n")
             f.write(f"class {base_name}(ABC):\n")
             f.write("    @abstractmethod\n")
             f.write('    def accept(self, visitor: "Visitor") -> Any:\n')
