@@ -40,6 +40,7 @@ class Scanner:
         return self.current >= len(self.source)
 
     def scan_token(self):
+        from lox import Lox
         c = self.advance()
         match c:
             case "(":
