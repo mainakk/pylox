@@ -2,6 +2,7 @@ from interpreter import Interpreter
 from parser import Parser
 from runtime_error import LoxRuntimeError
 from scanner import Scanner
+from stmt import Stmt
 from token_type import TokenType
 from token_ import Token
 
@@ -43,11 +44,11 @@ class Lox:
         tokens = scanner.scan_tokens()
 
         parser = Parser(tokens)
-        expr = parser.parse()
+        statements = parser.parse()
         if Lox.had_error:
             return
 
-        Lox.get_interpreter().interpret(expr)
+        Lox.get_interpreter().interpret(statements)
 
     @staticmethod
     def error(line: int, message: str):

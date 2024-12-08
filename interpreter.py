@@ -1,11 +1,14 @@
 from typing import Any
-from expr import Expr, Grouping, Literal, Unary, Visitor
+from expr import Expr, Grouping, Literal, Unary
+from expr import Visitor as ExprVisitor
 from runtime_error import LoxRuntimeError
+from stmt import Stmt
+from stmt import Visitor as StmtVisitor
 from token_type import TokenType
 from token_ import Token
 
 
-class Interpreter(Visitor):
+class Interpreter(ExprVisitor, StmtVisitor):
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
 
@@ -94,11 +97,11 @@ class Interpreter(Visitor):
 
         raise LoxRuntimeError(operator, "Operands must be numbers.")
 
-    def interpret(self, expr: Expr) -> None:
+    def interpret(self, statements: list[Stmt]) -> None:
         from lox import Lox
         try:
-            value = self.evaluate(expr)
-            print(self.stringify(value))
+            for statement in statements:
+                self.execute(statement)
         except LoxRuntimeError as e:
             Lox.runtime_error(e)
 
@@ -110,3 +113,13 @@ class Interpreter(Visitor):
             return str(int(value))
 
         return str(value)
+
+    def execute(self, stmt: Stmt) -> None:
+        stmt.accept(self)
+
+    def visit_expression_stmt(self, stmt: Stmt) -> None:
+        self.evaluate(stmt.expression)
+
+    def visit_print_stmt(self, stmt: Stmt) -> None:
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))

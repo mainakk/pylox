@@ -9,7 +9,10 @@ class AstGenerator:
             "Literal  : Any value",
             "Unary    : Token operator, Expr right",
         ])
-
+        AstGenerator.define_ast(output_dir, "Stmt", [
+            "Expression : Expr expression",
+            "Print      : Expr expression",
+        ])
     @staticmethod
     def define_ast(output_dir: str, base_name: str, types: list[str]):
         path = output_dir + "/" + base_name.lower() + ".py"
@@ -17,6 +20,8 @@ class AstGenerator:
             f.write("from abc import ABC, abstractmethod\n")
             f.write("from dataclasses import dataclass\n")
             f.write("from typing import Any\n")
+            if base_name.lower() != "expr":
+                f.write("from expr import Expr\n")
             f.write("from token_ import Token\n\n\n")
             f.write(f"class {base_name}(ABC):\n")
             f.write("    @abstractmethod\n")

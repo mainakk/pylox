@@ -1,4 +1,5 @@
 from expr import Binary, Expr, Grouping, Literal, Unary
+from stmt import Expression, Print, Stmt
 from token_type import TokenType
 from token_ import Token
 
@@ -120,8 +121,25 @@ class Parser:
         Lox.parse_error(token, message)
         return ParseError()
 
-    def parse(self) -> Expr:
-        try:
-            return self.expression()
-        except ParseError:
-            return None
+    def parse(self) -> list[Stmt]:
+        statements = []
+        while not self.is_at_end():
+            statements.append(self.statement())
+
+        return statements
+
+    def statement(self) -> Stmt:
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+
+        return self.expression_statement()
+
+    def print_statement(self) -> Stmt:
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expected ';' after value.")
+        return Print(value)
+
+    def expression_statement(self) -> Stmt:
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expected ';' after expression.")
+        return Expression(expr)
