@@ -4,6 +4,7 @@ class AstGenerator:
     @staticmethod
     def generate(output_dir: str):
         AstGenerator.define_ast(output_dir, "Expr", [
+            "Assign   : Token name, Expr value",
             "Binary   : Expr left, Token operator, Expr right",
             "Grouping : Expr expression",
             "Literal  : Any value",

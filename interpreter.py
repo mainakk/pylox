@@ -1,6 +1,6 @@
 from typing import Any
 from environment import Environment
-from expr import Expr, Grouping, Literal, Unary, Variable
+from expr import Assign, Expr, Grouping, Literal, Unary, Variable
 from expr import Visitor as ExprVisitor
 from runtime_error import LoxRuntimeError
 from stmt import Stmt, Var
@@ -137,4 +137,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.environment.define(stmt.name.lexeme, value)
 
     def visit_variable_expr(self, expr: Variable) -> Any:
-        return self.environment.get(expr.name.lexeme)
+        return self.environment.get(expr.name)
+
+    def visit_assign_expr(self, expr: Assign) -> Any:
+        value = self.evaluate(expr.value)
+        self.environment.assign(expr.name, value)
+        return value

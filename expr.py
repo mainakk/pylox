@@ -10,6 +10,13 @@ class Expr(ABC):
         pass
 
 @dataclass
+class Assign(Expr):
+    name: Token
+    value: Expr
+    def accept(self, visitor: 'Visitor') -> Any:
+        return visitor.visit_assign_expr(self)
+
+@dataclass
 class Binary(Expr):
     left: Expr
     operator: Token
@@ -43,6 +50,10 @@ class Variable(Expr):
         return visitor.visit_variable_expr(self)
 
 class Visitor(ABC):
+    @abstractmethod
+    def visit_assign_expr(self, expr: Assign) -> Any:
+        pass
+
     @abstractmethod
     def visit_binary_expr(self, expr: Binary) -> Any:
         pass
