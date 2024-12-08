@@ -1,4 +1,8 @@
+from ast_printer import AstPrinter
+from parser import Parser
 from scanner import Scanner
+from token_type import TokenType
+from token_ import Token
 import sys
 
 
@@ -28,8 +32,12 @@ class Lox:
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
 
-        for token in tokens:
-            print(token)
+        parser = Parser(tokens)
+        expr = parser.parse()
+        if Lox.had_error:
+            return
+
+        print(AstPrinter().print(expr))
 
     @staticmethod
     def error(line: int, message: str):
@@ -38,6 +46,14 @@ class Lox:
     @staticmethod
     def report(line: int, where: str, message: str):
         print(f"[line {line!s}] Error {where}: {message}")
+        Lox.had_error = True
+
+    @staticmethod
+    def parse_error(token: Token, message: str):
+        if token.type == TokenType.EOF:
+            Lox.report(token.line, " at end", message)
+        else:
+            Lox.report(token.line, f" at '{token.lexeme}'", message)
 
 
 if __name__ == "__main__":
