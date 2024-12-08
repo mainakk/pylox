@@ -8,10 +8,12 @@ class AstGenerator:
             "Grouping : Expr expression",
             "Literal  : Any value",
             "Unary    : Token operator, Expr right",
+            "Variable : Token name",
         ])
         AstGenerator.define_ast(output_dir, "Stmt", [
             "Expression : Expr expression",
             "Print      : Expr expression",
+            "Var        : Token name, Expr initializer",
         ])
     @staticmethod
     def define_ast(output_dir: str, base_name: str, types: list[str]):

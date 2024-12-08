@@ -14,7 +14,8 @@ class Lox:
 
     @staticmethod
     def get_interpreter():
-        Lox.interpreter = Interpreter()
+        if Lox.interpreter is None:
+            Lox.interpreter = Interpreter()
         return Lox.interpreter
 
     @staticmethod

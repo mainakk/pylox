@@ -1,5 +1,5 @@
-from expr import Binary, Expr, Grouping, Literal, Unary
-from stmt import Expression, Print, Stmt
+from expr import Binary, Expr, Grouping, Literal, Unary, Variable
+from stmt import Expression, Print, Stmt, Var
 from token_type import TokenType
 from token_ import Token
 
@@ -103,6 +103,9 @@ class Parser:
         if (self.match(TokenType.NUMBER, TokenType.STRING)):
             return Literal(self.previous().literal)
 
+        if self.match(TokenType.IDENTIFIER):
+            return Variable(self.previous())
+
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.")
@@ -124,7 +127,7 @@ class Parser:
     def parse(self) -> list[Stmt]:
         statements = []
         while not self.is_at_end():
-            statements.append(self.statement())
+            statements.append(self.declaration())
 
         return statements
 
@@ -143,3 +146,35 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ';' after expression.")
         return Expression(expr)
+
+    def declaration(self) -> Stmt:
+        try:
+            if self.match(TokenType.VAR):
+                return self.var_declaration()
+            return self.statement()
+        except ParseError:
+            self.synchronize()
+            return None
+
+    def var_declaration(self) -> Stmt:
+        name = self.consume(TokenType.IDENTIFIER, "Expected variable name.")
+
+        initializer = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expected ';' after variable declaration.")
+        return Var(name, initializer)
+
+    def synchronize(self):
+        self.advance()
+
+        while not self.is_at_end():
+            if self.previous().type == TokenType.SEMICOLON:
+                return
+
+            match self.peek().type:
+                case TokenType.CLASS | TokenType.FOR | TokenType.FUN | TokenType.IF | TokenType.PRINT | TokenType.RETURN | TokenType.VAR | TokenType.WHILE:
+                    return
+
+        self.advance()
