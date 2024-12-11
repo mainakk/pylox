@@ -1,5 +1,5 @@
 from expr import Assign, Binary, Expr, Grouping, Literal, Unary, Variable
-from stmt import Expression, Print, Stmt, Var
+from stmt import Block, Expression, Print, Stmt, Var
 from token_type import TokenType
 from token_ import Token
 
@@ -150,12 +150,24 @@ class Parser:
         if self.match(TokenType.PRINT):
             return self.print_statement()
 
+        if self.match(TokenType.LEFT_BRACE):
+            return Block(self.block())
+
         return self.expression_statement()
 
     def print_statement(self) -> Stmt:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ';' after value.")
         return Print(value)
+
+    def block(self) -> list[Stmt]:
+        statements = []
+
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_BRACE, "Expected '}' after block.")
+        return statements
 
     def expression_statement(self) -> Stmt:
         expr = self.expression()

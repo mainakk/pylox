@@ -8,6 +8,8 @@ from stmt import Visitor as StmtVisitor
 from token_type import TokenType
 from token_ import Token
 
+from copy import copy
+
 
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self) -> None:
@@ -143,3 +145,15 @@ class Interpreter(ExprVisitor, StmtVisitor):
         value = self.evaluate(expr.value)
         self.environment.assign(expr.name, value)
         return value
+
+    def visit_block_stmt(self, stmt):
+        self.execute_block(stmt.statements, copy(self.environment))
+
+    def execute_block(self, statements: list[Stmt], environment: Environment) -> None:
+        previous = self.environment
+        try:
+            self.environment = environment
+            for statement in statements:
+                self.execute(statement)
+        finally:
+            self.environment = previous
