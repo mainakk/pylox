@@ -37,6 +37,14 @@ class Literal(Expr):
         return visitor.visit_literal_expr(self)
 
 @dataclass
+class Logical(Expr):
+    left: Expr
+    operator: Token
+    right: Expr
+    def accept(self, visitor: 'Visitor') -> Any:
+        return visitor.visit_logical_expr(self)
+
+@dataclass
 class Unary(Expr):
     operator: Token
     right: Expr
@@ -64,6 +72,10 @@ class Visitor(ABC):
 
     @abstractmethod
     def visit_literal_expr(self, expr: Literal) -> Any:
+        pass
+
+    @abstractmethod
+    def visit_logical_expr(self, expr: Logical) -> Any:
         pass
 
     @abstractmethod

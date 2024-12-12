@@ -8,11 +8,6 @@ class Environment:
         self.values = {}
         self.enclosing = enclosing
 
-    def __copy__(self):
-        env = Environment(self.enclosing)
-        env.values = self.values.copy()
-        return env
-
     def define(self, name: str, value: Any):
         self.values[name] = value
 

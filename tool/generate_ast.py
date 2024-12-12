@@ -8,14 +8,17 @@ class AstGenerator:
             "Binary   : Expr left, Token operator, Expr right",
             "Grouping : Expr expression",
             "Literal  : Any value",
+            "Logical  : Expr left, Token operator, Expr right",
             "Unary    : Token operator, Expr right",
             "Variable : Token name",
         ])
         AstGenerator.define_ast(output_dir, "Stmt", [
-            "Block     : list[Stmt] statements",
+            "Block      : list[Stmt] statements",
             "Expression : Expr expression",
+            "If         : Expr condition, Stmt then_branch, Stmt else_branch",
             "Print      : Expr expression",
             "Var        : Token name, Expr initializer",
+            "While      : Expr condition, Stmt body",
         ])
     @staticmethod
     def define_ast(output_dir: str, base_name: str, types: list[str]):

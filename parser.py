@@ -1,5 +1,5 @@
-from expr import Assign, Binary, Expr, Grouping, Literal, Unary, Variable
-from stmt import Block, Expression, Print, Stmt, Var
+from expr import Assign, Binary, Expr, Grouping, Literal, Logical, Unary, Variable
+from stmt import Block, Expression, If, Print, Stmt, Var, While
 from token_type import TokenType
 from token_ import Token
 
@@ -17,7 +17,7 @@ class Parser:
         return self.assignment()
 
     def assignment(self) -> Expr:
-        expr = self.equality()
+        expr = self.or_()
 
         if self.match(TokenType.EQUAL):
             equals = self.previous()
@@ -28,6 +28,26 @@ class Parser:
                 return Assign(name, value)
 
             self.error(equals, "Invalid assignment target.")
+
+        return expr
+
+    def or_(self) -> Expr:
+        expr = self.and_()
+
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.and_()
+            expr = Logical(expr, operator, right)
+
+        return expr
+
+    def and_(self) -> Expr:
+        expr = self.equality()
+
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expr = Logical(expr, operator, right)
 
         return expr
 
@@ -147,15 +167,85 @@ class Parser:
         return statements
 
     def statement(self) -> Stmt:
+        if self.match(TokenType.FOR):
+            return self.for_statement()
+
+        if self.match(TokenType.IF):
+            return self.if_statement()
+
         if self.match(TokenType.PRINT):
             return self.print_statement()
+
+        if self.match(TokenType.WHILE):
+            return self.while_()
 
         if self.match(TokenType.LEFT_BRACE):
             return Block(self.block())
 
         return self.expression_statement()
 
-    def print_statement(self) -> Stmt:
+
+    def for_statement(self) -> While:
+        self.consume(TokenType.LEFT_PAREN, "Expected '(' after 'for'.")
+
+        initializer = None
+        if self.match(TokenType.SEMICOLON):
+            initializer = None
+        elif  self.match(TokenType.VAR):
+            initializer = self.var_declaration()
+        else:
+            initializer = self.expression_statement();
+
+        condition = None
+        if not self.check(TokenType.SEMICOLON):
+            condition = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expected ';' after loop condition.")
+
+        increment = None
+        if not self.check(TokenType.RIGHT_PAREN):
+            increment = self.expression()
+
+        self.consume(TokenType.RIGHT_PAREN, "Expected ')' after for clauses.")
+
+        body = self.statement()
+
+        if increment is not None:
+            body = Block([body, Expression(increment)])
+
+        if condition is None:
+            condition = Literal(True)
+
+        body = While(condition, body)
+
+        if initializer is not None:
+            body = Block([initializer, body])
+
+        return body
+
+
+    def while_(self) -> While:
+        self.consume(TokenType.LEFT_PAREN, "Expected '(' after 'while'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expected ')' after while condition.")
+
+        body = self.statement()
+        return While(condition, body)
+
+    def if_statement(self) -> If:
+        self.consume(TokenType.LEFT_PAREN, "Expected '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expected ')' after if condition.")
+
+        then_branch = self.statement()
+        else_branch = None
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return If(condition, then_branch, else_branch)
+
+
+    def print_statement(self) -> Print:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ';' after value.")
         return Print(value)
@@ -169,7 +259,7 @@ class Parser:
         self.consume(TokenType.RIGHT_BRACE, "Expected '}' after block.")
         return statements
 
-    def expression_statement(self) -> Stmt:
+    def expression_statement(self) -> Expression:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ';' after expression.")
         return Expression(expr)
@@ -183,7 +273,7 @@ class Parser:
             self.synchronize()
             return None
 
-    def var_declaration(self) -> Stmt:
+    def var_declaration(self) -> Var:
         name = self.consume(TokenType.IDENTIFIER, "Expected variable name.")
 
         initializer = None
