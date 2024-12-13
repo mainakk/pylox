@@ -25,6 +25,14 @@ class Binary(Expr):
         return visitor.visit_binary_expr(self)
 
 @dataclass
+class Call(Expr):
+    callee: Expr
+    paren: Token
+    arguments: list[Expr]
+    def accept(self, visitor: 'Visitor') -> Any:
+        return visitor.visit_call_expr(self)
+
+@dataclass
 class Grouping(Expr):
     expression: Expr
     def accept(self, visitor: 'Visitor') -> Any:
@@ -64,6 +72,10 @@ class Visitor(ABC):
 
     @abstractmethod
     def visit_binary_expr(self, expr: Binary) -> Any:
+        pass
+
+    @abstractmethod
+    def visit_call_expr(self, expr: Call) -> Any:
         pass
 
     @abstractmethod

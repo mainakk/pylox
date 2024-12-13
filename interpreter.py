@@ -1,17 +1,35 @@
+import time
 from typing import Any
 from environment import Environment
 from expr import Assign, Expr, Grouping, Literal, Logical, Unary, Variable
 from expr import Visitor as ExprVisitor
+from lox_callable import LoxCallable
+from lox_function import LoxFunction
 from runtime_error import LoxRuntimeError
-from stmt import Block, Expression, If, Print, Stmt, Var, While
+from stmt import Block, Expression, Function, If, Print, Stmt, Var, While
 from stmt import Visitor as StmtVisitor
 from token_type import TokenType
 from token_ import Token
 
 
+class Clock(LoxCallable):
+    def arity(self) -> int:
+        return 0
+
+    def call_(self, interpreter, arguments):
+        return time.time()
+
+    def __str__(self):
+        return "<native fn>"
+
+
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self) -> None:
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = Environment(self.globals)
+
+        self.globals.define("clock", Clock())
+
 
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
@@ -179,3 +197,20 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def visit_while_stmt(self, stmt: While) -> None:
         while self.is_truthy(self.evaluate(stmt.condition)):
             self.execute(stmt.body)
+
+    def visit_call_expr(self, expr):
+        callee = self.evaluate(expr.callee)
+        arguments = [self.evaluate(argument) for argument in expr.arguments]
+
+        if not isinstance(callee, LoxCallable):
+            raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        if len(arguments) != callee.arity():
+            raise LoxRuntimeError(expr.paren, f"Expected {callee.arity()} arguments but got {len(arguments)}")
+
+        return callee.call_(self, arguments)
+
+
+    def visit_function_stmt(self, stmt):
+        function = LoxFunction(stmt)
+        self.environment.define(stmt.name.lexeme, function)
