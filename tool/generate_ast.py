@@ -19,6 +19,7 @@ class AstGenerator:
             "Function   : Token name, list[Token] params, list[Stmt] body",
             "If         : Expr condition, Stmt then_branch, Stmt else_branch",
             "Print      : Expr expression",
+            "Return     : Token keyword, Expr value",
             "Var        : Token name, Expr initializer",
             "While      : Expr condition, Stmt body",
         ])

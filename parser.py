@@ -1,5 +1,5 @@
 from expr import Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable
-from stmt import Block, Expression, Function, If, Print, Stmt, Var, While
+from stmt import Block, Expression, Function, If, Print, Return, Stmt, Var, While
 from token_type import TokenType
 from token_ import Token
 
@@ -199,6 +199,9 @@ class Parser:
         if self.match(TokenType.PRINT):
             return self.print_statement()
 
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
+
         if self.match(TokenType.WHILE):
             return self.while_()
 
@@ -206,6 +209,16 @@ class Parser:
             return Block(self.block())
 
         return self.expression_statement()
+
+
+    def return_statement(self) -> Return:
+        keyword = self.previous()
+        value = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expected ';' after return value.")
+        return Return(keyword, value)
 
 
     def for_statement(self) -> While:

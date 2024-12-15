@@ -5,8 +5,9 @@ from expr import Assign, Expr, Grouping, Literal, Logical, Unary, Variable
 from expr import Visitor as ExprVisitor
 from lox_callable import LoxCallable
 from lox_function import LoxFunction
+from return_exception import Return
 from runtime_error import LoxRuntimeError
-from stmt import Block, Expression, Function, If, Print, Stmt, Var, While
+from stmt import Block, Expression, If, Print, Stmt, Var, While
 from stmt import Visitor as StmtVisitor
 from token_type import TokenType
 from token_ import Token
@@ -26,7 +27,7 @@ class Clock(LoxCallable):
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self) -> None:
         self.globals = Environment()
-        self.environment = Environment(self.globals)
+        self.environment = self.globals
 
         self.globals.define("clock", Clock())
 
@@ -212,5 +213,13 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
 
     def visit_function_stmt(self, stmt):
-        function = LoxFunction(stmt)
+        function = LoxFunction(stmt, self.environment)
         self.environment.define(stmt.name.lexeme, function)
+
+    def visit_return_stmt(self, stmt):
+        value = None
+
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+
+        raise Return(value)
