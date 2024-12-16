@@ -45,7 +45,7 @@ class AstGenerator:
 
     @staticmethod
     def define_type(f, base_name: str, name: str, fields: str):
-        f.write("@dataclass\n")
+        f.write("@dataclass(unsafe_hash=True)\n")
         f.write(f"class {name}({base_name}):\n")
         for field in fields.split(", "):
             type_, filed_name = field.split(" ")

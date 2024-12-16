@@ -9,14 +9,14 @@ class Expr(ABC):
     def accept(self, visitor: "Visitor") -> Any:
         pass
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Assign(Expr):
     name: Token
     value: Expr
     def accept(self, visitor: 'Visitor') -> Any:
         return visitor.visit_assign_expr(self)
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Binary(Expr):
     left: Expr
     operator: Token
@@ -24,7 +24,7 @@ class Binary(Expr):
     def accept(self, visitor: 'Visitor') -> Any:
         return visitor.visit_binary_expr(self)
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Call(Expr):
     callee: Expr
     paren: Token
@@ -32,19 +32,19 @@ class Call(Expr):
     def accept(self, visitor: 'Visitor') -> Any:
         return visitor.visit_call_expr(self)
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Grouping(Expr):
     expression: Expr
     def accept(self, visitor: 'Visitor') -> Any:
         return visitor.visit_grouping_expr(self)
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Literal(Expr):
     value: Any
     def accept(self, visitor: 'Visitor') -> Any:
         return visitor.visit_literal_expr(self)
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Logical(Expr):
     left: Expr
     operator: Token
@@ -52,14 +52,14 @@ class Logical(Expr):
     def accept(self, visitor: 'Visitor') -> Any:
         return visitor.visit_logical_expr(self)
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Unary(Expr):
     operator: Token
     right: Expr
     def accept(self, visitor: 'Visitor') -> Any:
         return visitor.visit_unary_expr(self)
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Variable(Expr):
     name: Token
     def accept(self, visitor: 'Visitor') -> Any:

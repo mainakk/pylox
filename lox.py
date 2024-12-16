@@ -1,5 +1,6 @@
 from interpreter import Interpreter
 from parser import Parser
+from resolver import Resolver
 from runtime_error import LoxRuntimeError
 from scanner import Scanner
 from stmt import Stmt
@@ -46,6 +47,12 @@ class Lox:
 
         parser = Parser(tokens)
         statements = parser.parse()
+        if Lox.had_error:
+            return
+
+        resolver = Resolver(Lox.get_interpreter())
+        resolver.resolve_statements(statements)
+
         if Lox.had_error:
             return
 
